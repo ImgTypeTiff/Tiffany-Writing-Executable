@@ -13,6 +13,8 @@ ___
 
 - Markdown to html! (type in markdown, then press ctrl+shift+p)
 
+- Code blocks! (-ish)
+
 - COUPLE OF KNOWN ISSUES:
 	* There are two view menus! (i probably already fixed and i didn't change this)
 
