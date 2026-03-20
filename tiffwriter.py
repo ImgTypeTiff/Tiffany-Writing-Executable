@@ -66,7 +66,6 @@ class TiffWriter(QMainWindow):
         toggle_preview.triggered.connect(self.toggle_preview)
         view_menu.addAction(toggle_preview)
 
-        view_menu = menu.addMenu("View")
         toggle_html_preview = QAction("Toggle HTML Preview", self)
         toggle_html_preview.setShortcut("Ctrl+Shift+P")
         toggle_html_preview.triggered.connect(self.toggle_html_preview)
