@@ -34,7 +34,7 @@ I use nuitka in order to create executables. In the same folder (with the depend
 nuitka --follow-imports  --include-package=markdown --include-package=mdx_partial_gfm tiffwriter.py --macos-create-app-bundle --enable-plugin=pyside6 --macos-app-icon=tws.icns
 ```
 
-If you're a windows user PLEASE compile a version and send it to me. I don't use windows so I con't provide an exe. 
+If you're a windows user PLEASE compile a version and send it to me. I don't use windows so I can't provide an exe. 
 
 ___
 Okay have fun
