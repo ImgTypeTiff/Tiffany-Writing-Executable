@@ -1,0 +1,76 @@
+# .github/workflows/ci-cd.yml
+name: Python CI/CD with Nuitka
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]  # test on multiple Python versions
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install nuitka
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest tests
+          fi
+
+  build-executable:
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    needs: build-and-test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka
+
+      - name: Build executable with Nuitka
+        run: |
+          nuitka --standalone --onefile tiffwriter.py
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: tiffwriter-${{ runner.os }}
+          path: tiffwriter.dist/tiffwriter 
