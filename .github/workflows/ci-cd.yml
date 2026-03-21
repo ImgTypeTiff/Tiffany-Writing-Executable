@@ -59,23 +59,41 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install nuitka
 
+      - name: Setup Dependency Walker (Windows only)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $depwalker = "$env:USERPROFILE\depwalker"
+          if (-not (Test-Path $depwalker)) {
+            Invoke-WebRequest -Uri "https://www.dependencywalker.com/depends22_x64.zip" -OutFile "$env:USERPROFILE\depends.zip"
+            Expand-Archive "$env:USERPROFILE\depends.zip" -DestinationPath $depwalker
+          }
+          echo "$depwalker" >> $env:GITHUB_PATH
+
       - name: Build executable
         shell: bash
         run: |
-          if [[ "${{ runner.os }}" == "macos-latest" ]]; then
-            # macOS .app bundle with optional icon and Info.plist
-            python -m nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns "tiffany writing executable.py"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            # macOS .app bundle with optional icon
+            python -m nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns --output-dir=dist "tiffany writing executable.py"
           else
             # Linux/Windows onefile executable
-            python -m nuitka --standalone --onefile "tiffany writing executable.py"
+            python -m nuitka --standalone --onefile --output-dir=dist "tiffany writing executable.py"
           fi
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
