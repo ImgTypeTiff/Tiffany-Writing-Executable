@@ -1,0 +1,4 @@
+nuitka
+pyside6
+markdown
+py-gfm
