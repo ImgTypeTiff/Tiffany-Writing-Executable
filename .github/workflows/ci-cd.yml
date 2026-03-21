@@ -69,10 +69,10 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "macos-latest" ]]; then
             # macOS .app bundle with optional icon and Info.plist
-            nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns tiffwriter.py
+            nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns "tiffany writing executable.py"
           else
             # Linux/Windows onefile executable
-            nuitka --standalone --onefile tiffwriter.py
+            nuitka --standalone --onefile "tiffany writing executable.py"
           fi
 
       - name: Upload artifact
