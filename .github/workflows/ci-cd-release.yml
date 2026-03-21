@@ -96,7 +96,7 @@ jobs:
             # Linux/Windows onefile executable
             python -m nuitka --standalone --onefile --output-dir=dist --include-package=markdown --include-package=mdx_partial_gfm --enable-plugin=pyside6 --assume-yes-for-downloads --windows-icon-from-ico=windows/tws.ico "tiffany writing executable.py"
       - name: Upload artifacts to release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*
