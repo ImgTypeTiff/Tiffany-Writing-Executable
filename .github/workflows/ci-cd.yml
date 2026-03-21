@@ -89,7 +89,7 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             # macOS .app bundle with optional icon
-            python -m nuitka --standalone  --include-package=markdown --include-package=mdx_partial_gfm --macos-create-app-bundle --enable-plugin=pyside6 --output-dir=dist --macos-app-icon=tws.icns --output-filename="tiffany writing executable" --macos-app-name="tiffany writing executable" "tiffany writing executable.py"
+            python -m nuitka --standalone  --include-package=markdown --include-package=mdx_partial_gfm --macos-create-app-bundle --enable-plugin=pyside6 --output-dir=dist --macos-app-icon=macos/tws.icns --output-filename="tiffany writing executable" --macos-app-name="tiffany writing executable" "tiffany writing executable.py"
           else
             # Linux/Windows onefile executable
             python -m nuitka --standalone --onefile --output-dir=dist --include-package=markdown --include-package=mdx_partial_gfm --enable-plugin=pyside6 --assume-yes-for-downloads "tiffany writing executable.py"
