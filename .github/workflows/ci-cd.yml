@@ -73,6 +73,7 @@ jobs:
           else
             # Linux/Windows onefile executable
             nuitka --standalone --onefile tiffwriter.py
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
