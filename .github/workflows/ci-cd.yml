@@ -1,76 +1,38 @@
 # .github/workflows/ci-cd.yml
-name: Python CI/CD with Nuitka
+build-executable:
+  runs-on: ${{ matrix.os }}
+  needs: build-and-test
+  strategy:
+    matrix:
+      os: [ubuntu-latest, windows-latest, macos-latest]
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.11, 3.12]  # test on multiple Python versions
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install nuitka
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+    - name: Build executable
+      run: |
+        if [[ "${{ runner.os }}" == "macos-latest" ]]; then
+          # Build macOS .app bundle
+          nuitka --standalone --macos-app-bundle --output-dir=dist tiffwriter.py
+        else
+          # Normal build for Linux/Windows
+          nuitka --standalone --onefile tiffwriter.py
+        fi
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install nuitka
-
-      - name: Run tests
-        run: |
-          if [ -d tests ]; then
-            pytest tests
-          fi
-
-  build-executable:
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
-    needs: build-and-test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install nuitka
-
-      - name: Build executable with Nuitka
-        run: |
-          nuitka --standalone --onefile "tiffany writing executable.py"
-
-      - name: Upload executable
-        uses: actions/upload-artifact@v4
-        with:
-          name: tiffwriter-${{ runner.os }}
-          path: tiffwriter.dist/tiffwriter 
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: tiffwriter-${{ runner.os }}
+        path: dist/
