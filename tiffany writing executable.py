@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QAction, QFontDatabase, QTextCursor, QTextDocument
 from PySide6.QtCore import Qt
 from PySide6.QtPrintSupport import QPrinter
+import importlib.util
 
 
 class TiffWriter(QMainWindow):
@@ -241,6 +242,38 @@ class TiffWriter(QMainWindow):
         doc = QTextDocument()
         doc.setHtml(html_content)
         doc.print_(printer)
+
+    def load_plugins(self):
+        plugin_dir = os.path.join(os.path.dirname(__file__), "plugins")
+
+        if not os.path.exists(plugin_dir):
+            os.makedirs(plugin_dir)
+            return
+
+        for file in os.listdir(plugin_dir):
+            if not file.endswith(".py") or file.startswith("_"):
+                continue
+
+            path = os.path.join(plugin_dir, file)
+            name = file[:-3]
+
+            spec = importlib.util.spec_from_file_location(name, path)
+            module = importlib.util.module_from_spec(spec)
+
+            try:
+                spec.loader.exec_module(module)
+
+                # 🔥 Call plugin init hook
+                if hasattr(module, "__init_extension__"):
+                    module.__init_extension__(self)
+                    print(f"Initialized plugin: {name}")
+                else:
+                    print(f"Loaded plugin (no init): {name}")
+
+                self.plugins.append(module)
+
+            except Exception as e:
+                print(f"Error loading plugin {name}: {e}")
 
 
 if __name__ == "__main__":
