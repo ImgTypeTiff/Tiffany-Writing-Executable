@@ -66,6 +66,7 @@ jobs:
           pip install nuitka
 
       - name: Build executable
+        shell: bash
         run: |
           if [[ "${{ runner.os }}" == "macos-latest" ]]; then
             # macOS .app bundle with optional icon and Info.plist
