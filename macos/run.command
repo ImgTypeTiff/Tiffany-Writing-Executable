@@ -1,5 +1,7 @@
 #!/bin/bash
 
+chmod +x "$0"
+
 APP="tiffany writing executable.app"
 cd "$(dirname "$0")"
 
