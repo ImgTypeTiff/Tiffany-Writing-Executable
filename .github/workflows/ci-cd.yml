@@ -89,7 +89,7 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             # macOS .app bundle with optional icon
-            python -m nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns --output-dir=dist "tiffany writing executable.py"
+            python -m nuitka --standalone --macos-create-app-bundle --macos-app-icon=tws.icns --output-dir=dist "tiffany writing executable.py"
           else
             # Linux/Windows onefile executable
             python -m nuitka --standalone --onefile --output-dir=dist "tiffany writing executable.py"
