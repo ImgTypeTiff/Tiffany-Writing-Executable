@@ -15,6 +15,8 @@ ___
 
 - Code blocks! (-ish)
 
+- Plugin system! Add what ever you want! (I'll make a wiki or something)
+
 - COUPLE OF KNOWN ISSUES:
 	* There are two view menus! (i probably already fixed and i didn't change this)
 
