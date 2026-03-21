@@ -72,6 +72,13 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka
 
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Setup Dependency Walker (Windows only)
         if: runner.os == 'Windows'
         shell: powershell
@@ -96,10 +103,12 @@ jobs:
             # Linux/Windows onefile executable
             python -m nuitka --standalone --onefile --output-dir=dist --include-package=markdown --include-package=mdx_partial_gfm --enable-plugin=pyside6 --assume-yes-for-downloads --windows-icon-from-ico=windows/tws.ico "tiffany writing executable.py"
           fi
-      - name: Upload artifacts to release
+      - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/*
+            dist/tiffwriter-macOS-${VERSION}.zip
+            dist/tiffwriter-windows-${VERSION}.exe
+            dist/tiffwriter-linux-${VERSION}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
