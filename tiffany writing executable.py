@@ -28,12 +28,21 @@ class TiffWriter(QMainWindow):
         self.status = QStatusBar()
         self.setStatusBar(self.status)
 
+        self.plugins = {}
+
+        self.load_plugins()
         self.create_menus()
 
         self.new_tab()
+        self.refresh_plugins_menu()
+        
 
     def create_menus(self):
+        
         menu = self.menuBar()
+
+        plugins_menu = menu.addMenu("Plugins")
+        self.plugins_menu = plugins_menu
 
         file_menu = menu.addMenu("File")
         open_action = QAction("Open", self)
@@ -160,11 +169,27 @@ class TiffWriter(QMainWindow):
         </html>
         """
         return styled_html
+
     def update_preview(self, editor, preview, html_preview):
         text = editor.toPlainText()
         preview.setHtml(self.render_markdown(text))
         html_preview.setPlainText(self.render_markdown(text))
         self.update_word_count(editor)
+
+        # --- plugin hook ---
+        tab_data = self.current_tab_data()  # <-- THIS fixes it
+        if not tab_data:
+            return
+
+        for plugin in self.plugins.values():
+            if not plugin["enabled"]:
+                continue
+            module = plugin["module"]
+            if hasattr(module, "on_text_change"):
+                try:
+                    module.on_text_change(self, tab_data)
+                except Exception as e:
+                    print(f"Plugin error ({module.__name__}): {e}")
 
     def update_word_count(self, editor):
         text = editor.toPlainText()
@@ -244,6 +269,7 @@ class TiffWriter(QMainWindow):
         doc.print_(printer)
 
     def load_plugins(self):
+
         plugin_dir = os.path.join(os.path.dirname(__file__), "plugins")
 
         if not os.path.exists(plugin_dir):
@@ -263,17 +289,47 @@ class TiffWriter(QMainWindow):
             try:
                 spec.loader.exec_module(module)
 
-                # 🔥 Call plugin init hook
-                if hasattr(module, "__init_extension__"):
-                    module.__init_extension__(self)
-                    print(f"Initialized plugin: {name}")
-                else:
-                    print(f"Loaded plugin (no init): {name}")
-
-                self.plugins.append(module)
+                self.plugins[name] = {
+                    "module": module,
+                    "enabled": False
+                }
+                display_name = getattr(module, "PLUGIN_NAME", name)
+                print(f"Loaded plugin: {display_name}")
 
             except Exception as e:
-                print(f"Error loading plugin {name}: {e}")
+                print(f"Error loading plugin: {name}: {e}")
+            
+    def refresh_plugins_menu(self):
+        self.plugins_menu.clear()
+        for file_name, data in self.plugins.items():
+            module = data["module"]
+            # Use PLUGIN_NAME if defined, otherwise fallback to file name
+            display_name = getattr(module, "PLUGIN_NAME", file_name)
+
+            action = QAction(display_name, self)
+            action.setCheckable(True)
+            action.setChecked(data["enabled"])
+            action.triggered.connect(lambda checked, n=file_name: self.toggle_plugin(n, checked))
+            self.plugins_menu.addAction(action)
+        
+    def toggle_plugin(self, name, enabled):
+        plugin = self.plugins[name]
+        plugin["enabled"] = enabled
+
+        module = plugin["module"]
+
+        try:
+            if enabled:
+                if hasattr(module, "__init_extension__"):
+                    module.__init_extension__(self)
+                    print(f"Enabled plugin: {name}")
+            else:
+                if hasattr(module, "__disable_extension__"):
+                    module.__disable_extension__(self)
+                    print(f"Disabled plugin: {name}")
+
+        except Exception as e:
+            print(f"Plugin error ({name}): {e}")
 
 
 if __name__ == "__main__":
