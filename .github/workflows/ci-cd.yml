@@ -67,7 +67,7 @@ jobs:
 
       - name: Build executable with Nuitka
         run: |
-          nuitka --standalone --onefile tiffwriter.py
+          nuitka --standalone --onefile "tiffany writing executable.py"
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
