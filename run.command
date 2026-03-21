@@ -1,6 +1,7 @@
 #!/bin/bash
 
 APP="tiffany writing executable.app"
+cd "$(dirname "$0")"
 
 if [ ! -d "$APP" ]; then
   echo "Error: $APP not found in this folder."
