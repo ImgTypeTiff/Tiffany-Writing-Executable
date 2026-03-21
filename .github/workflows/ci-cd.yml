@@ -89,10 +89,10 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             # macOS .app bundle with optional icon
-            python -m nuitka --standalone --macos-create-app-bundle --macos-app-icon=tws.icns --output-dir=dist "tiffany writing executable.py"
+            python -m nuitka --standalone --macos-create-app-bundle --include-package=markdown --include-package=mdx_partial_gfm --enable-plugin=pyside6 --macos-app-icon=tws.icns --output-dir=dist "tiffany writing executable.py"
           else
             # Linux/Windows onefile executable
-            python -m nuitka --standalone --onefile --output-dir=dist --assume-yes-for-downloads "tiffany writing executable.py"
+            python -m nuitka --standalone --onefile --output-dir=dist --include-package=markdown --include-package=mdx_partial_gfm --enable-plugin=pyside6 --assume-yes-for-downloads "tiffany writing executable.py"
           fi
       - name: Upload artifact
         uses: actions/upload-artifact@v4
