@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.11, 3.12]  # test on multiple Python versions
+        python-version: [3.11, 3.12]
 
     steps:
       - name: Checkout code
@@ -65,12 +65,17 @@ jobs:
           pip install -r requirements.txt
           pip install nuitka
 
-      - name: Build executable with Nuitka
+      - name: Build executable
         run: |
-          nuitka --standalone --onefile "tiffany writing executable.py"
+          if [[ "${{ runner.os }}" == "macos-latest" ]]; then
+            # macOS .app bundle with optional icon and Info.plist
+            nuitka --standalone --macos-app-bundle --macos-app-icon=tws.icns tiffwriter.py
+          else
+            # Linux/Windows onefile executable
+            nuitka --standalone --onefile tiffwriter.py
 
-      - name: Upload executable
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tiffwriter-${{ runner.os }}
-          path: tiffwriter.dist/tiffwriter
+          name: tiffwriter-${{ runner.os }}-${{ github.sha }}
+          path: dist/
